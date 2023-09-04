@@ -1,0 +1,6 @@
+CFLAGS	= -std=gnu99 -Os -Wall -Wextra -fno-builtin -ffreestanding -m32 -fno-asynchronous-unwind-tables -fno-common -fno-pie -march=i486 -fno-stack-protector -ffunction-sections -fdata-sections
+LDFLAGS = -nostdlib -Wl,--build-id=none,--gc-sections -nostartfiles -static -m32
+ASFLAGS = -m32
+GRUBDIR = iso
+SOURCEDIR = src
+TARGET = kernel
