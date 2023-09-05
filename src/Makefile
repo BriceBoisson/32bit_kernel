@@ -13,6 +13,7 @@ OBJS	= \
 	  pic_controler.o \
 	  userland.o \
 	  launch_process.o \
+	  paging.o \
 
 DEPS = $(OBJS:.o=.d)
 
