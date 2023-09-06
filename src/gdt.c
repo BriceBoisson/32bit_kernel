@@ -78,20 +78,20 @@ void init_gdt(void)
     // Code
     gdt[1] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0xFFFF,
                             .Base = 0, .Type = 0x0B, .S = 1, .DPL = 0, .P = 1,
-                            .Limit_2 = 0x02, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
+                            .Limit_2 = 0x0F, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
     // Data
     gdt[2] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0xFFFF,
                             .Base = 0, .Type = 2, .S = 1, .DPL = 0, .P = 1,
-                            .Limit_2 = 0x02, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
+                            .Limit_2 = 0x0F, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
     
     // Code
     gdt[3] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0xFFFF,
-                            .Base = 0x30000, .Type = 0x0B, .S = 1, .DPL = 3, .P = 1,
+                            .Base = 0, .Type = 0x0B, .S = 1, .DPL = 3, .P = 1,
                             .Limit_2 = 0x0F, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
     
     // Data
     gdt[4] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0xFFFF,
-                            .Base = 0x30000, .Type = 2, .S = 1, .DPL = 3, .P = 1,
+                            .Base = 0, .Type = 2, .S = 1, .DPL = 3, .P = 1,
                             .Limit_2 = 0x0F, .AVL = 0, .L = 0, .D_B = 1, .G = 1 });
     
     user_land_tss.ssp = 0x0;

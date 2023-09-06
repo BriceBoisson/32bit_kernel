@@ -7,14 +7,14 @@ void userland(void)
     // asm volatile ("movl $2, %eax; int $0x30");
     // asm("movl %%eax,%0" : "=r"(res));
     // asm volatile ("int $0x30");
-    char *str = (void *) 0x100;
+    char *str = (void *) 0x30100;
     str[0] = 'H';
     str[1] = 'e';
     str[2] = 'l';
     str[3] = 'l';
     str[4] = 'o';
     str[5] = '\0';
-    asm volatile ("mov $1, %%eax; movl $0x30100, %%ebx; int $0x30; movl %%eax, %0" : "=r" (res));
+    asm volatile ("mov $1, %%eax; movl $0x30100, %%ebx; int $0x30; movl %%eax, %1" : "=m" (str), "=r" (res));
     // asm volatile ("mov $1, %%eax; movl %0, %%ebx; int $0x30" : "=m" (str));
     // asm ("mov $1, %eax; int $0x30");
     // asm ("movl %0, %eax; int $0x30" : "=m" (res));
