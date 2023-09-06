@@ -23,6 +23,7 @@ void main(void)
 
 void kernel_main(void)
 {
+
 	init_serial();
 
 	DEBUG_INFO("Starting kernel");
@@ -30,6 +31,8 @@ void kernel_main(void)
 	init_gdt();
 	init_idt();
 	pic_init();
+	make_page();
+	asm volatile ("sti");
 
 	main();
 }

@@ -96,5 +96,4 @@ void init_idt(void)
     DEBUG_INFO("IDT LOADED");
 
     DEBUG_INFO("ENABLING STI");
-    asm volatile ("sti");
 }
