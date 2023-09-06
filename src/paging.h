@@ -18,7 +18,7 @@ struct page_table_entry {
 
 int make_page(void);
 
-extern struct page_directory_entry page_dir[1024];
-extern struct page_table_entry page_table[1024];
+// extern struct page_directory_entry page_dir[1024];
+// extern struct page_table_entry page_table[1024];
 
 #endif  /*  !PAGING_H */
