@@ -26,7 +26,7 @@ void launch_process(int tss, int memory_start, int userland_stack, int userland_
         and $0xffffbfff, %%eax  \n \
         push %%eax              \n \
         push %5                 \n \
-        push $0x0               \n \
+        push $0x30000               \n \
         movl $0x20000, %6       \n \
         movw %7, %%ax           \n \
         movw %%ax, %%ds         \n \
