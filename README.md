@@ -6,7 +6,9 @@ This kernel is written as a educative project. The goal is to have a kernel able
 - [X] Manage IRQ (enable PIC)
 - [X] Running and Userland (TSS)
 - [X] Let the userland call the kernel (syscall)
+- [ ] Use paging
 - [ ] Running multiple userland (ordonnanceur)
+- [ ] Using ext2 File System
 - [ ] Running elf binary
 - [ ] Having a small libc and needed syscall to run the shell
 - [ ] (Bonus) Having a basic visual interface (VGA ?)
