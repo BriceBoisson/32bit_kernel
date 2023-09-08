@@ -14,6 +14,7 @@ OBJS	= \
 	  userland.o \
 	  launch_process.o \
 	  paging.o \
+	  elf.o \
 	  myfile.o \
 
 DEPS = $(OBJS:.o=.d)
