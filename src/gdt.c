@@ -69,8 +69,6 @@ void init_gdt(void)
     kgdtr.limit     = sizeof(gdt) - 1;
     kgdtr.base      = (u32) gdt;
 
-    memcpy((char*) 0x30000, &userland, 1000);
-
     gdt[0] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0,
                             .Base = 0, .Type = 0, .S = 0, .DPL = 0, .P = 0,
                             .Limit_2 = 0, .AVL = 0, .L = 0, .D_B = 0, .G = 0 });

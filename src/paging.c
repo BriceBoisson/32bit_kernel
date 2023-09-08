@@ -3,8 +3,8 @@
 #include "debug.h"
 #include "serial.h"
 
-struct page_directory_entry *page_dir = 0x2000; //__attribute__((aligned(4096)));
-struct page_table_entry *page_table = 0x3000; //__attribute__((aligned(4096)));
+struct page_directory_entry *page_dir = 0x5000; //__attribute__((aligned(4096)));
+struct page_table_entry *page_table = 0x6000; //__attribute__((aligned(4096)));
 
 struct page_directory_param {
     u8 P;
