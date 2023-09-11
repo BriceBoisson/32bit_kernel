@@ -3,8 +3,30 @@
 #include "debug.h"
 #include "serial.h"
 
-struct page_directory_entry *page_dir = 0x5000; //__attribute__((aligned(4096)));
-struct page_table_entry *page_table = 0x6000; //__attribute__((aligned(4096)));
+struct page_directory_entry *page_dir; // = 0x3000000; //__attribute__((aligned(4096)));
+struct page_table_entry *page_table; // = 0x3010000; //__attribute__((aligned(4096)));
+u8 page_avl[131072] = { 0 };
+int page_avl_index = 0x300000 / 8;
+
+int find_page_avl(void)
+{
+    for (int i = page_avl_index; i < 131071; i++) {
+        for (int j = 0; j < 8; j++) {
+            if ((page_avl[i] & (1 << j)) == 0) {
+                page_avl_index = i;
+                return i * 8 + j;
+            }
+        }
+    }
+
+    // TODO : Add memory deallocation policies
+    return -1;
+}
+
+void set_page(int address)
+{
+    page_avl[address / 8] |= (1 << (address % 8));
+}
 
 struct page_directory_param {
     u8 P;
@@ -75,6 +97,9 @@ struct page_table_entry create_page_table_entry(struct page_table_param param)
 
 int make_page(void)
 {
+    page_dir = (struct page_directory_entry *) 0x3000000;
+    page_table = (struct page_table_entry *) 0x3010000;
+
     for (int i = 0; i < 1024; i++)
     {
         page_table[i] = create_page_table_entry((struct page_table_param) {
@@ -132,6 +157,7 @@ int make_page(void)
     DEBUG_INFO("address of Page Directory Array: %d", page_dir);
     DEBUG_INFO("address of the first Page Table array: %d", page_table);
 
+    // load page directory and enable paging (cr0 bit 31)
     asm volatile ("            \
     mov %0, %%eax           \n \
     mov %%eax, %%cr3        \n \
