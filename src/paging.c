@@ -2,11 +2,17 @@
 
 #include "debug.h"
 #include "serial.h"
+#include "userland.h"
 
 struct page_directory_entry *page_dir; // = 0x3000000; //__attribute__((aligned(4096)));
 struct page_table_entry *page_table; // = 0x3010000; //__attribute__((aligned(4096)));
-u8 page_avl[131072] = { 0 };
-int page_avl_index = 0x300000 / 8;
+u8 page_avl[131072] = {0};
+int page_avl_index = (USERLAND_BASE_ADDRESS >> 12) / 8;
+int userland_page_dir_index = 0;
+
+#define KERNEL_PAGE_DIR 0x3000000
+#define KERNEL_PAGE_TABLE 0x3010000
+#define NB_KERNEL_PAGE_DIR 20
 
 int find_page_avl(void)
 {
@@ -14,7 +20,7 @@ int find_page_avl(void)
         for (int j = 0; j < 8; j++) {
             if ((page_avl[i] & (1 << j)) == 0) {
                 page_avl_index = i;
-                return i * 8 + j;
+                return (i * 8 + j) << 12;
             }
         }
     }
@@ -25,7 +31,13 @@ int find_page_avl(void)
 
 void set_page(int address)
 {
-    page_avl[address / 8] |= (1 << (address % 8));
+    page_avl[(address >> 12) / 8] |= (1 << ((address >> 12) % 8));
+}
+
+void clear_page(int address)
+{
+    page_avl[(address >> 12) / 8] |= (1 << ((address >> 12) % 8));
+    page_avl[(address >> 12) / 8] ^=  (1 << ((address >> 12) % 8));
 }
 
 struct page_directory_param {
@@ -95,24 +107,27 @@ struct page_table_entry create_page_table_entry(struct page_table_param param)
     return page_table;
 }
 
-int make_page(void)
+int create_kernel_page(void)
 {
-    page_dir = (struct page_directory_entry *) 0x3000000;
-    page_table = (struct page_table_entry *) 0x3010000;
+    page_dir = (struct page_directory_entry *) KERNEL_PAGE_DIR;
+    page_table = (struct page_table_entry *) KERNEL_PAGE_TABLE;
 
-    for (int i = 0; i < 1024; i++)
+    for (int i = 0; i < NB_KERNEL_PAGE_DIR; i++)
     {
-        page_table[i] = create_page_table_entry((struct page_table_param) {
-                    .P = 1, .R_W = 1, .U = 1, .PWT = 0, .PCD = 0,
-                    .A = 0, .D = 0, .PAT = 0, .G = 0,
-                    .address = 1 * i});
+        for (int j = 0; j < 1024; j++)
+        {
+            page_table[i * 1024 + j] = create_page_table_entry((struct page_table_param) {
+                        .P = 1, .R_W = 1, .U = 0, .PWT = 0, .PCD = 0,
+                        .A = 0, .D = 0, .PAT = 0, .G = 0,
+                        .address = j + i * 1024});
+        }
+        DEBUG_INFO("PAGE_TABLE %d", &page_table[i * 1024]);
+        page_dir[i] = create_page_directory_entry((struct page_directory_param) {
+                    .P = 1, .R_W = 1, .U = 0, .PWT = 0, .PCD = 0,
+                    .A = 0, .PS = 0, .address = &page_table[i * 1024]});
     }
 
-    page_dir[0] = create_page_directory_entry((struct page_directory_param) {
-                .P = 1, .R_W = 1, .U = 1, .PWT = 0, .PCD = 0,
-                .A = 0, .PS = 0, .address = page_table});
-
-    for (int i = 1; i < 1024; i++)
+    for (int i = NB_KERNEL_PAGE_DIR; i < 1024; i++)
     {
         page_dir[i] = create_page_directory_entry((struct page_directory_param) {
                         .P = 0, .R_W = 0, .U = 0, .PWT = 0, .PCD = 0,
@@ -166,4 +181,113 @@ int make_page(void)
     mov %%eax, %%cr0" : "=m" (page_dir));
 
     return 0;
+}
+
+int create_new_userland_page(int uid)
+{
+    struct page_directory_entry *userland_page_dir = userland_data->userland_data[uid].page_directories;
+    struct page_table_entry *kernel_page_table = (struct page_table_entry *) KERNEL_PAGE_TABLE;
+
+    for (int i = 0; i < NB_KERNEL_PAGE_DIR; i++)
+    {
+        DEBUG_INFO("PAGE_TABLE %d", &kernel_page_table[i * 1024]);
+        userland_page_dir[i] = create_page_directory_entry((struct page_directory_param) {
+                        .P = 1, .R_W = 1, .U = 0, .PWT = 0, .PCD = 0,
+                        .A = 0, .PS = 0, .address = &kernel_page_table[i * 1024]});
+    }
+
+    for (int i = 0; i < 1024; i++)
+    {
+        int avl_address = find_page_avl();
+        set_page(avl_address);
+        userland_data->userland_data[uid].page_table[i] = create_page_table_entry((struct page_table_param) {
+                        .P = 1, .R_W = 1, .U = 0, .PWT = 0, .PCD = 0,
+                        .A = 0, .D = 0, .PAT = 0, .G = 0,
+                        .address = (avl_address >> 12)});
+    }
+
+    userland_page_dir[NB_KERNEL_PAGE_DIR] = create_page_directory_entry((struct page_directory_param) {
+                        .P = 1, .R_W = 1, .U = 0, .PWT = 0, .PCD = 0,
+                        .A = 0, .PS = 0, .address = userland_data->userland_data[uid].page_table});
+
+    for (int i = NB_KERNEL_PAGE_DIR + 1; i < 1024; i++)
+    {
+        userland_page_dir[i] = create_page_directory_entry((struct page_directory_param) {
+                        .P = 0, .R_W = 0, .U = 0, .PWT = 0, .PCD = 0,
+                        .A = 0, .PS = 0, .address = 0});
+    }
+}
+
+// int find_empty_page(struct page_directory_entry *page_dir)
+// {
+//     for (int i = 20; i < 1024; i++)
+//     {
+//         if (page_dir[i].address == 0)
+//         {
+//             int page_table_entry = 0;
+//             if (i != 20)
+//             {
+//                 if ((page_table_entry = find_empty_page_table(page_dir[i - 1].address)) != -1)
+//                     return (i - 1, )
+//             }
+//         }
+//     }
+//     return -1;
+// }
+
+// int find_empty_page_table(struct page_table_entry *page_table)
+// {
+//     for (int i = 0; i < 1024; i++)
+//     {
+//         if (page_table[i].address == 0)
+//         {
+//             return i;
+//         }
+//     }
+//     return -1;
+// }
+
+// int find_last_page_dir_entry(struct page_directory_entry *page_dir)
+// {
+//     for (int i = NB_KERNEL_PAGE_DIR; i < 1024; i++)
+//     {
+//         if (page_dir[i].address == 0)
+//             return i - 1;
+//     }
+//     return -1;
+// }
+
+int allocate_new_page(int uid, int address)
+{
+    struct page_directory_entry *userland_page_dir = userland_data->userland_data[uid].page_directories;
+
+    int dir_address = address >> 22;
+    int table_address = (address >> 12) ^ ((address >> 22) << 10);
+
+    DEBUG_INFO("dir_address %d", dir_address);
+    DEBUG_INFO("table_address %d", table_address);
+
+    // CPU does't use page table when decoding page table, so it need the physical address
+    int new_page_table_real = (int) userland_data->userland_data[uid].page_table[dir_address].address;
+    struct page_table_entry *new_page_table = USERLAND_BASE_ADDRESS + dir_address * 1024 * 4;
+
+    if (userland_page_dir[dir_address].address != 0 && new_page_table->address != 0)
+        clear_page(new_page_table->address);
+
+    if (userland_page_dir[dir_address].address == 0)
+    {
+        userland_page_dir[dir_address] = create_page_directory_entry((struct page_directory_param) {
+                        .P = 1, .R_W = 1, .U = 1, .PWT = 0, .PCD = 0,
+                        .A = 0, .PS = 0, .address = new_page_table_real << 12});
+    }
+
+    for (struct page_table_entry *i = new_page_table; i < new_page_table + 1024; i++)
+    {
+        int avl_address = find_page_avl();
+        set_page(avl_address);
+        *i = create_page_table_entry((struct page_table_param) {
+                            .P = 1, .R_W = 1, .U = 1, .PWT = 0, .PCD = 0,
+                            .A = 0, .D = 0, .PAT = 0, .G = 0,
+                            .address = (avl_address >> 12)});
+    }
 }

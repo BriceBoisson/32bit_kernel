@@ -67,6 +67,9 @@ void init_idt(void)
         .Type = 0x06, .D = 1, .DPL = 0, .P = 1 });
     }
 
+    idt[14] = init_gate((struct interrupt_gate_param) { .Offset = (u32) _asm_page_fault, .SegSelect = 0x08,
+        .Type = 0x06, .D = 1, .DPL = 0, .P = 1 });
+
     idt[32] = init_gate((struct interrupt_gate_param) { .Offset = (u32) _asm_irq_0, .SegSelect = 0x08,
         .Type = 0x06, .D = 1, .DPL = 0, .P = 1 });
     

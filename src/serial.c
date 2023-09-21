@@ -24,6 +24,14 @@ int init_serial()
 
 int write_serial_nb(int nb, int ln)
 {
+	if (nb < 0)
+	{
+		while ((inb(PORT + 5) & 0x20) == 0);
+		outb(PORT, '-');
+		write_serial_nb(-nb, ln);
+		return 0;
+	}
+
 	if (nb < 10)
 	{
 		while ((inb(PORT + 5) & 0x20) == 0);

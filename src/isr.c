@@ -10,6 +10,11 @@ void isr_default_int(void)
     DEBUG_INFO("An INT has been raised, entering default interrupt handler.");
 }
 
+void isr_page_fault(void)
+{
+    DEBUG_INFO("A page fault exception occured");
+}
+
 void isr_clock_int(void)
 {
     DEBUG_INFO("Enterring clock interrupt handler.");

@@ -16,7 +16,8 @@ struct page_table_entry {
     u32 address : 20;
 } __attribute__((packed));
 
-int make_page(void);
+int create_kernel_page(void);
+int allocate_new_page(int uid, int address);
 
 // extern struct page_directory_entry page_dir[1024];
 // extern struct page_table_entry page_table[1024];

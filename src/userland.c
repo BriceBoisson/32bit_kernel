@@ -1,5 +1,7 @@
 #include "userland.h"
 
+struct userlands_data *userland_data = 0x3020000;
+
 // void userland(void)
 // {
 //     int res = 0;
