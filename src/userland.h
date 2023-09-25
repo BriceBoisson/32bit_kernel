@@ -20,6 +20,7 @@ struct userlands_data {
 
 extern struct userlands_data *userland_data;
 
-void userland(void);
+int create_process(int uid, char *data_start);
+int switch_to_process(int uid);
 
 #endif /*   !USERLAND_H */

@@ -46,6 +46,6 @@ enum elf_segment_type {
     NOTE = 4
 };
 
-int load_elf(char *elf_data_start);
+int load_elf(char *elf_data_start, int uid);
 
 #endif ELF_H

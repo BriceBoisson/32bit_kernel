@@ -7,7 +7,7 @@
 
 void isr_default_int(void)
 {
-    DEBUG_INFO("An INT has been raised, entering default interrupt handler.");
+    // DEBUG_INFO("An INT has been raised, entering default interrupt handler.");
 }
 
 void isr_page_fault(void)

@@ -3,8 +3,9 @@
 #include <types.h>
 #include "serial.h"
 #include "debug.h"
+#include "paging.h"
 
-int load_elf(char *elf_data_start)
+int load_elf(char *elf_data_start, int uid)
 {
     DEBUG_INFO("LOAD ELF: ", elf_data_start);
 
@@ -19,8 +20,15 @@ int load_elf(char *elf_data_start)
 		struct elf_header_table *elf_header_table = (struct elf_header_table *) (elf_data_start + elf_header->program_header_table_offset + sizeof(struct elf_header_table) * i);
 		u32 segment_type = elf_header_table->segment_type;
 
-		if (segment_type == LOAD && elf_header_table->p_vaddr < 0x100000)
+		DEBUG_INFO("ELF type : %d", segment_type == LOAD);
+		if (segment_type == LOAD && elf_header_table->p_vaddr >= 0x6000000)
 		{
+			for (u32 mem = (elf_header_table->p_vaddr >> 12); mem < ((elf_header_table->p_vaddr + elf_header_table->p_filesz) >> 12) + 1; mem += 1)
+			{
+				DEBUG_INFO("ELF ALLOCATE %d: ", mem << 12);
+				allocate_new_page(uid, mem << 12);
+			}
+
 			memcpy(elf_header_table->p_vaddr, elf_data_start + elf_header_table->p_offset, elf_header_table->p_filesz);
 
 			if (elf_header_table->p_filesz < elf_header_table->p_memsz)
