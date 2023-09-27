@@ -6,9 +6,9 @@
  *  Syscall handler for write, currently only serial write is supported.
  *  Use the fd 1, to make a serial write.
  */
-int write(int fd, void *buf)
+int write(int fd, void *buf, int size)
 {
-    if (fd != 1)
+    if (fd != 1 || size < 0)
         return -1;
 
     if (write_serial(buf))

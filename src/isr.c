@@ -7,7 +7,12 @@
 
 void isr_default_int(void)
 {
-    DEBUG_INFO("An INT has been raised, entering default interrupt handler.");
+    // DEBUG_INFO("An INT has been raised, entering default interrupt handler.");
+}
+
+void isr_page_fault(void)
+{
+    DEBUG_INFO("A page fault exception occured");
 }
 
 void isr_clock_int(void)
@@ -23,16 +28,17 @@ void isr_kbd_int(void)
     DEBUG_INFO("Keyboard input: %d", x);
 }
 
-void syscall_handler(int eax, int ebx)
+int syscall_handler(int eax, void *ebx, void *ecx, void *edx, void *edi, void *esi)
 {
-    DEBUG_INFO("Syscall %d has been called from the userland with parameter %d", eax, ebx);
+    DEBUG_INFO("Syscall %d has been called from the userland with parameters: %d, %d, %d, %d, %d", eax, ebx, ecx, edx, edi, esi);
 
     switch (eax)
     {
     case 1:
-        char t = *((char *) ebx);
-        DEBUG_INFO("Syscall write : %d", (int) t);
-        return write(1, (u32) ebx);
+        int fd = (int) ebx;
+        char *buf = (char *) ecx;
+        int size = (int) edx;
+        return write(fd, buf, size);
         break;
     case 2:
         DEBUG_INFO("Syscall keyboard");

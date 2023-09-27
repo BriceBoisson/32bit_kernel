@@ -7,12 +7,23 @@
 #include "debug.h"
 #include "tss.h"
 #include "launch_process.h"
+#include "elf.h"
+#include "userland.h"
+
+extern char _binary_a_out_start[];
+extern char _binary_a_out_end[];
+extern char _binary_a_out_size[];
 
 void main(void)
 {
-	DEBUG_INFO("Entering Main Function");	
+	DEBUG_INFO("Entering Main Function");
 
-	launch_process(0x28, 0x30000, 0x20, 0x18, 0x20);
+	char *data_start     = &_binary_a_out_start;
+    char *data_end       = _binary_a_out_end;
+    size_t data_size  = (size_t)_binary_a_out_size;
+
+	create_process(0, data_start);
+	switch_to_process(0);
 
 	for (;;)
 	{
@@ -23,7 +34,6 @@ void main(void)
 
 void kernel_main(void)
 {
-
 	init_serial();
 
 	DEBUG_INFO("Starting kernel");
@@ -31,7 +41,7 @@ void kernel_main(void)
 	init_gdt();
 	init_idt();
 	pic_init();
-	make_page();
+	create_kernel_page();
 	asm volatile ("sti");
 
 	main();

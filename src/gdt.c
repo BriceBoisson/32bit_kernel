@@ -14,7 +14,9 @@ void *memcpy(void *dest, const void *src, size_t n)
 	char *d = dest;
 
 	for (size_t i = 0; i < n; i++)
+    {
 		*d++ = *s++;
+    }
 
 	return dest;
 }
@@ -68,8 +70,6 @@ void init_gdt(void)
     DEBUG_INFO("GDT LIMIT: %d", sizeof(gdt) - 1);
     kgdtr.limit     = sizeof(gdt) - 1;
     kgdtr.base      = (u32) gdt;
-
-    memcpy((char*) 0x30000, &userland, 1000);
 
     gdt[0] = init_descriptor((struct segment_desc_param) { .Limit_1 = 0,
                             .Base = 0, .Type = 0, .S = 0, .DPL = 0, .P = 0,

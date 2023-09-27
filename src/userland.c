@@ -1,26 +1,45 @@
 #include "userland.h"
 
-void userland(void)
+#include "debug.h"
+#include "paging.h"
+#include "launch_process.h"
+
+struct userlands_data *userland_data = 0x3020000;
+
+int create_process(int uid, char *data_start)
 {
-    int res = 0;
-    // asm ("mov $1, %0" : "=r" (res));
-    // asm volatile ("movl $2, %eax; int $0x30");
-    // asm("movl %%eax,%0" : "=r"(res));
-    // asm volatile ("int $0x30");
-    char *str = (void *) 0x30100;
-    str[0] = 'H';
-    str[1] = 'e';
-    str[2] = 'l';
-    str[3] = 'l';
-    str[4] = 'o';
-    str[5] = '\0';
-    asm volatile ("mov $1, %%eax; movl $0x30100, %%ebx; int $0x30; movl %%eax, %1" : "=m" (str), "=r" (res));
-    // asm volatile ("mov $1, %%eax; movl %0, %%ebx; int $0x30" : "=m" (str));
-    // asm ("mov $1, %eax; int $0x30");
-    // asm ("movl %0, %eax; int $0x30" : "=m" (res));
-    // asm ("movl %eax, %eax; int $0x30");
-    // asm ("movl $28, %eax; movl $5, %ebx; int $0x30");
-    // asm ("movl $43, %eax; movl $7, %ebx; int $0x30");
-    while (1);
-    return; /* never go there */
+    create_new_userland_page(uid);
+
+    DEBUG_INFO("CREATE PROCESS");
+    void *process_page_dir_adress = userland_data->userland_data[uid].page_directories;
+
+    // load cr3
+    asm volatile ("                 \
+        mov %0, %%eax     \n \
+        mov %%eax, %%cr3" : "+r" (process_page_dir_adress));
+
+    // Allocate stack
+    allocate_new_page(uid, 0x7FFFF000);
+    allocate_new_page(uid, 0x7FFFE000);
+    allocate_new_page(uid, 0x7FFFD000);
+
+    // TODO : create data seg by process
+    // load elf
+    load_elf(data_start, uid);
+
+    return 0;
+}
+
+int switch_to_process(int uid)
+{
+    DEBUG_INFO("SWITCHING TO PROCESS");
+    void *process_page_dir_adress = userland_data->userland_data[uid].page_directories;
+
+    // load cr3
+    asm volatile ("                 \
+        mov %0, %%eax     \n \
+        mov %%eax, %%cr3" : "+r" (process_page_dir_adress));
+
+    // TODO : once data by process has been implemented, load the right one
+    launch_process(0x28, 0x6000000, 0x20, 0x18, 0x20);
 }
