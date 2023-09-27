@@ -4,3 +4,4 @@ ASFLAGS = -m32
 GRUBDIR = iso
 SOURCEDIR = src
 TARGET = kernel
+LIB=libk

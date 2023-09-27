@@ -20,6 +20,8 @@ int create_process(int uid, char *data_start)
 
     // Allocate stack
     allocate_new_page(uid, 0x7FFFF000);
+    allocate_new_page(uid, 0x7FFFE000);
+    allocate_new_page(uid, 0x7FFFD000);
 
     // TODO : create data seg by process
     // load elf

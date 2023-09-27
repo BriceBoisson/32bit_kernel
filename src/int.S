@@ -82,16 +82,24 @@ _asm_sycall_handler:
 	push %ds
 	push %es
 	push %fs
-	push %gs 
+	push %gs
 	push %ebx
 	mov $0x10,%bx
 	mov %bx,%ds
 	pop %ebx
+	push %esi
+	push %edi
+	push %edx
+	push %ecx
 	push %ebx
 	push %eax
     call syscall_handler
 	pop %ebx
 	pop %ebx
+	pop %ecx
+	pop %edx
+	pop %edi
+	pop %esi
     pop %gs
 	pop %fs
 	pop %es
