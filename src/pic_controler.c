@@ -101,6 +101,8 @@ void pic_init(void)
         IRQ_set_mask(i);
     }
 
+    DEBUG_INFO("Unmasking IRQ 0 - Clock");
+    IRQ_clear_mask(0);
     DEBUG_INFO("Unmasking IRQ 1 - Keyboard");
     IRQ_clear_mask(1);
     

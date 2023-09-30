@@ -30,6 +30,21 @@ int create_process(int uid, char *data_start)
     return 0;
 }
 
+int switch_to_ring_3(int uid){
+    DEBUG_INFO("SWITCHING TO RING 3");
+    void *process_page_dir_adress = userland_data->userland_data[uid].page_directories;
+
+    // load cr3
+    asm volatile ("                 \
+        mov %0, %%eax     \n \
+        mov %%eax, %%cr3" : "+r" (process_page_dir_adress));
+
+    userland_data->curent_process = uid;
+    userland_data->active_process[uid / 32] |= 1 << (uid % 32);
+
+    launch_process(0x28, 0x6000000, 0x20, 0x18, 0x20);
+}
+
 int switch_to_process(int uid)
 {
     DEBUG_INFO("SWITCHING TO PROCESS");
@@ -40,6 +55,8 @@ int switch_to_process(int uid)
         mov %0, %%eax     \n \
         mov %%eax, %%cr3" : "+r" (process_page_dir_adress));
 
-    // TODO : once data by process has been implemented, load the right one
-    launch_process(0x28, 0x6000000, 0x20, 0x18, 0x20);
+    userland_data->curent_process = uid;
+    userland_data->active_process[uid / 32] |= 1 << (uid % 32);
+
+    return 0;
 }

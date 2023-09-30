@@ -22,8 +22,12 @@ void main(void)
     char *data_end       = _binary_a_out_end;
     size_t data_size  = (size_t)_binary_a_out_size;
 
+	u16 tss = 0x28;
+
 	create_process(0, data_start);
-	switch_to_process(0);
+	create_process(1, data_start);
+	userland_data->active_process[0] |= 1 << (1 % 32);
+	switch_to_ring_3(0);
 
 	for (;;)
 	{

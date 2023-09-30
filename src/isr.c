@@ -4,6 +4,7 @@
 #include "pic_controler.h"
 #include "debug.h"
 #include "syscall.h"
+#include "userland.h"
 
 void isr_default_int(void)
 {
@@ -17,7 +18,15 @@ void isr_page_fault(void)
 
 void isr_clock_int(void)
 {
-    DEBUG_INFO("Enterring clock interrupt handler.");
+    DEBUG_INFO("Clock interrupt handler.");
+    for (int i = (userland_data->curent_process + 1) % 128; i != userland_data->curent_process; i = (i + 1) % 128)
+    {
+        if (userland_data->active_process[i / 32] & (1 << (i % 32)))
+        {
+            switch_to_process(i);
+            return;
+        }
+    }
 }
 
 void isr_kbd_int(void)
