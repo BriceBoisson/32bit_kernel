@@ -5,3 +5,4 @@ GRUBDIR = iso
 SOURCEDIR = src
 TARGET = kernel
 LIB=libk
+APP=hello_world
