@@ -20,6 +20,8 @@ int init_serial()
 	outb(PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
 	outb(PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
 	outb(PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+
+	return 0;
 }
 
 int write_serial_nb(int nb, int ln)
@@ -86,7 +88,7 @@ int write_serial_char(char c)
 
 int write_serial(char * s)
 {
-	for (size_t i = 0; i < strlen(s); i++)
+	for (int i = 0; i < strlen(s); i++)
 	{
 		while ((inb(PORT + 5) & 0x20) == 0);
 		outb(PORT, s[i]);

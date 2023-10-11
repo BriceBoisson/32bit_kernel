@@ -4,6 +4,7 @@
 #include "serial.h"
 #include "debug.h"
 #include "paging.h"
+#include "tools.h"
 
 int load_elf(char *elf_data_start, int uid)
 {
@@ -29,13 +30,15 @@ int load_elf(char *elf_data_start, int uid)
 				allocate_new_page(uid, mem << 12);
 			}
 
-			memcpy(elf_header_table->p_vaddr, elf_data_start + elf_header_table->p_offset, elf_header_table->p_filesz);
+			memcpy((void *) elf_header_table->p_vaddr, elf_data_start + elf_header_table->p_offset, elf_header_table->p_filesz);
 
 			if (elf_header_table->p_filesz < elf_header_table->p_memsz)
 			{
-				for (int i = elf_header_table->p_filesz; i < elf_header_table->p_memsz; i++)
+				for (u32 i = elf_header_table->p_filesz; i < elf_header_table->p_memsz; i++)
 					elf_header_table->p_vaddr[elf_data_start + elf_header_table->p_offset + i] = 0;
 			}
 		}
 	}
+
+	return 0;
 }

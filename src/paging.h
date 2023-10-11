@@ -17,6 +17,7 @@ struct page_table_entry {
 } __attribute__((packed));
 
 int create_kernel_page(void);
+int create_new_userland_page(int uid);
 int allocate_new_page(int uid, int address);
 
 // extern struct page_directory_entry page_dir[1024];

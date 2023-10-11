@@ -18,9 +18,7 @@ void main(void)
 {
 	DEBUG_INFO("Entering Main Function");
 
-	char *data_start     = &_binary_a_out_start;
-    char *data_end       = _binary_a_out_end;
-    size_t data_size  = (size_t)_binary_a_out_size;
+	char *data_start	= (char *) &_binary_a_out_start;
 
 	create_process(0, data_start);
 	switch_to_process(0);

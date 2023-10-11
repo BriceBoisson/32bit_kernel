@@ -3,7 +3,7 @@
 #include "tss.h"
 #include "debug.h"
 
-void launch_process(u16 tss, int memory_start, int userland_stack, int userland_code, u16 userland_data)
+void launch_process(u16 tss, int userland_stack, int userland_code, u16 userland_data)
 {
     // Setting DPL and GDT bits
     userland_stack += 3;

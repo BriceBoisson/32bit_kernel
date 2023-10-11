@@ -16,6 +16,7 @@ OBJS	= \
 	  paging.o \
 	  elf.o \
 	  myfile.o \
+	  tools.o \
 
 DEPS = $(OBJS:.o=.d)
 

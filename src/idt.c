@@ -46,8 +46,9 @@ struct idt_segdesc init_gate(struct interrupt_gate_param param)
 
     descriptor.Type         =       param.Type | (param.D << 3);
 
-    descriptor.Flags        |=       param.DPL << 1;
-    descriptor.Flags        |=       param.P << 3;
+    descriptor.Flags        =       0;
+    descriptor.Flags        |=      param.DPL << 1;
+    descriptor.Flags        |=      param.P << 3;
 
     return descriptor;
 }
@@ -56,12 +57,13 @@ void init_idt(void)
 {
     DEBUG_INFO("Initializing IDT");
 
+    u16 idt_size = sizeof(idt) / sizeof(struct idt_segdesc);
     DEBUG_INFO("IDT BASE ADDRESS: %d", (u32) &kidtr);
-    DEBUG_INFO("IDT LIMIT: %d", sizeof(idt) - 1);
+    DEBUG_INFO("IDT LIMIT: %d", idt_size - 1);
     kidtr.limit     = sizeof(idt) - 1;
     kidtr.base      = (u32) idt;
     
-    for (int i = 0; i < sizeof(idt); i++)
+    for (size_t i = 0; i < idt_size; i++)
     {
         idt[i] = init_gate((struct interrupt_gate_param) { .Offset = (u32) _asm_default_int, .SegSelect = 0x08,
         .Type = 0x06, .D = 1, .DPL = 0, .P = 1 });

@@ -2,9 +2,10 @@
 
 #include "debug.h"
 #include "paging.h"
+#include "elf.h"
 #include "launch_process.h"
 
-struct userlands_data *userland_data = 0x3020000;
+struct userlands_data *userland_data = (struct userlands_data *) 0x3020000;
 
 int create_process(int uid, char *data_start)
 {
@@ -41,5 +42,7 @@ int switch_to_process(int uid)
         mov %%eax, %%cr3" : "+r" (process_page_dir_adress));
 
     // TODO : once data by process has been implemented, load the right one
-    launch_process(0x28, 0x6000000, 0x20, 0x18, 0x20);
+    launch_process(0x28, 0x20, 0x18, 0x20);
+
+    return 0;
 }

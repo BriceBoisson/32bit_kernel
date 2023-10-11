@@ -27,4 +27,4 @@ struct segdesc {
 void init_gdt(void);
 void temp_run_process(void);
 
-#endif				/* !GDT_H */
+#endif /*       !GDT_H */

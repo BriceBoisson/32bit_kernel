@@ -8,19 +8,6 @@
 #include "tss.h"
 #include "userland.h"
 
-void *memcpy(void *dest, const void *src, size_t n)
-{
-	const char *s = src;
-	char *d = dest;
-
-	for (size_t i = 0; i < n; i++)
-    {
-		*d++ = *s++;
-    }
-
-	return dest;
-}
-
 struct tss user_land_tss;
 
 struct segment_desc_param {
@@ -66,8 +53,9 @@ void init_gdt(void)
 {
     DEBUG_INFO("Initializing GDT");
 
+    u16 gdt_size = sizeof(gdt) / sizeof(struct segdesc);
     DEBUG_INFO("GDT BASE ADDRESS: %d", (u32) &kgdtr);
-    DEBUG_INFO("GDT LIMIT: %d", sizeof(gdt) - 1);
+    DEBUG_INFO("GDT LIMIT: %d", gdt_size - 1);
     kgdtr.limit     = sizeof(gdt) - 1;
     kgdtr.base      = (u32) gdt;
 
@@ -102,10 +90,10 @@ void init_gdt(void)
     DEBUG_INFO("TSS BASE ADDRESS: %d", (u32) &user_land_tss);
 
     gdt[5] = init_descriptor((struct segment_desc_param) { .Limit_1 = sizeof(user_land_tss),
-                            .Base = &user_land_tss, .Type = 0x09, .S = 0, .DPL = 3, .P = 1,
+                            .Base = (u32) &user_land_tss, .Type = 0x09, .S = 0, .DPL = 3, .P = 1,
                             .Limit_2 = 0x00, .AVL = 0, .L = 0, .D_B = 0, .G = 0 });
 
-    for (int i = 0; i < sizeof(gdt) / 8; i++)
+    for (size_t i = 0; i < gdt_size; i++)
     {
         char *ptr = (char *) &gdt[i];
         DEBUG_INFO("--------------------");

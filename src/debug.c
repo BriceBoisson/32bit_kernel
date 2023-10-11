@@ -19,7 +19,7 @@ int print_variadic(char *msg, va_list args)
                 write_serial(va_arg(args, char *));
                 break;
             case 'b':
-                write_serial_bin(va_arg(args, char *), false);
+                write_serial_bin((int) va_arg(args, char *), false);
                 break;
             case 'c':
                 write_serial_char(va_arg(args, int));
@@ -36,12 +36,14 @@ int print_variadic(char *msg, va_list args)
             msg++;
         }
     }
+
+    return 0;
 }
 
-int debug_info(char *fnt, char *msg, ...)
+int debug_info(const char *fnt, char *msg, ...)
 {
     write_serial("\033[0;34m[INFO]\033[0m     ");
-    write_serial(fnt);
+    write_serial((char *) fnt);
     write_serial("\t: ");
 
     va_list args;
@@ -54,10 +56,10 @@ int debug_info(char *fnt, char *msg, ...)
     return 0;
 }
 
-int debug_warn(char *fnt, char *msg, ...)
+int debug_warn(const char *fnt, char *msg, ...)
 {
     write_serial("\033[0;33m[WARNING]\033[0m  ");
-    write_serial(fnt);
+    write_serial((char *) fnt);
     write_serial("\t: ");
     
     va_list args;
@@ -70,10 +72,10 @@ int debug_warn(char *fnt, char *msg, ...)
     return 0;
 }
 
-int debug_err(char *fnt, char *msg, ...)
+int debug_err(const char *fnt, char *msg, ...)
 {
     write_serial("\033[0;31m[ERROR]\033[0m    ");
-    write_serial(fnt);
+    write_serial((char *) fnt);
     write_serial("\t: ");
 
     va_list args;

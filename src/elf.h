@@ -48,4 +48,4 @@ enum elf_segment_type {
 
 int load_elf(char *elf_data_start, int uid);
 
-#endif ELF_H
+#endif /*   !ELF_H */

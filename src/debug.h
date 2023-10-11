@@ -15,8 +15,8 @@
 	#define DEBUG_ERR(...)
 #endif
 
-int debug_info(char *fnt, char *msg, ...);
-int debug_warn(char *fnt, char *msg, ...);
-int debug_err(char *fnt, char *msg, ...);
+int debug_info(const char *fnt, char *msg, ...);
+int debug_warn(const char *fnt, char *msg, ...);
+int debug_err(const char *fnt, char *msg, ...);
 
 #endif /*   DEBUG_H */
